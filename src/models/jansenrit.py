@@ -1,10 +1,5 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
 from scipy.integrate import solve_ivp
-
-sns.set_theme(style="ticks", context="paper", palette="colorblind")
-FIGSIZE = (6, 4)
 
 def sigmoid(v, e0=2.5, v0=6.0, r=0.56):
     """
@@ -70,45 +65,37 @@ def jansen_rit(t, y, p=120.0, A=3.25, B=22.0, a=100.0, b=50.0, C=135.0):
     # return vector of derivatives for IVP solver
     return [dy0, dy1, dy2, dy3, dy4, dy5]
 
-t_start = 0.0
-t_end = 1.0
-sf = 1000 # sampling frequency 1000Hz
 
-# linspace takes (start, end, # points)
-t_eval = np.linspace(t_start, t_end, int((t_end - t_start) * sf) + 1) # points = intervals + 1
+def solve_jr(t_end=2.0, sf=1000):
+    """
+    sf = 1000 # sampling frequency 1000Hz
+    t_end = how long the sim will run for
+    initial value problem solver
+    given the initial condition and ODEs, it will approximate y(t) for times after t0
+    returns an OdeResult object with fields
+          sol.t = time points associated w solutions
+          sol. y = solution matrix n x m
+          column i of sol.y corresponds to time sol.t[i]
+          row j is yj's approximate value
+          this means indexing works like:
+              sol.y[1] gives the array of y1 values at every time point in sol.t
+    """
+    t_start = 0.0
 
-# all six state variables start at zero
-y0_init = np.zeros(6)
+    # linspace takes (start, end, # points)
+    t_eval = np.linspace(t_start, t_end, int((t_end - t_start) * sf) + 1) # points = intervals + 1
 
-# initial value problem solver
-# given the initial condition and ODEs, it will approximate y(t) for times after t0
-# returns an OdeResult object with fields
-#       sol.t = time points associated w solutions
-#       sol. y = solution matrix n x m
-#       column i of sol.y corresponds to time sol.t[i]
-#       row j is yj's approximate value
-#       this means indexing works like:
-#           sol.y[1] gives the array of y1 values at every time point in sol.t
-sol = solve_ivp(
-    fun=jansen_rit,
-    t_span=(t_start, t_end), # integrate over this time range
-    y0=y0_init,
-    t_eval=t_eval, # the time points where we want it to sample
-)
+    # all six state variables start at zero
+    y0_init = np.zeros(6)
 
-# calculate net drive into pyramidal cells at every time point
-net = sol.y[1] - sol.y[2]
+    sol = solve_ivp(
+        fun=jansen_rit,
+        t_span=(t_start, t_end), # integrate over this time range
+        y0=y0_init,
+        t_eval=t_eval, # the time points where we want it to sample
+    )
 
-plt.figure(figsize=FIGSIZE)
-plt.plot(sol.t, net)
-plt.plot(sol.t, sol.y[1], label="y1 (excitation)")
-plt.plot(sol.t, sol.y[2], label="y2 (inhibition)")
-plt.xlabel("Time (s)")
-plt.ylabel("y1 - y2")
-plt.title("Jansen-Rit Net Pyramidal Drive")
-plt.tight_layout()
-plt.legend()
-sns.despine()
-plt.show()
+    return sol
+
 
 # the small upward bump that can be seen in the resulting plot can be explained by the fact excitatory interneurons take time to respond to the drop in inhibition (must be propagated through pyramidal cell activity and appropriate synaptic delay) and so remain high slightly longer, and y1-y2 briefly grows
