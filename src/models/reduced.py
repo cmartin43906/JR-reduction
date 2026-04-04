@@ -1,7 +1,9 @@
 import numpy as np
 
+
 def sigmoid(x, a, theta):
     return 1.0 / (1.0 + np.exp(-a * (x - theta)))
+
 
 def reduced_rhs(E, I, params):
     # unpack parameters
@@ -24,6 +26,7 @@ def reduced_rhs(E, I, params):
 
     return dE, dI
 
+
 # inspired by code in lecture slides
 def simulate_reduced(params, E0=0.1, I0=0.1, dt=0.1, T=1000.0):
     n = int(T / dt) + 1
@@ -38,6 +41,7 @@ def simulate_reduced(params, E0=0.1, I0=0.1, dt=0.1, T=1000.0):
         I[k + 1] = I[k] + dt * dI
 
     return t, E, I
+
 
 def eeg_proxy(E, I):
     return E - I

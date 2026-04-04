@@ -1,38 +1,47 @@
-# src/main.py
-
 from visualization import *
+
 
 def main():
 
-    print("\n\nThis is the main visualization script for dynamical analysis of the reduced Jansen-Rit Model. \n \nThe first plot shown depicts behavior of Excitatory and Inhibitory interactions and Pyramidal drive in the original, unreduced Jansen-Rit model under a parameter set that produces oscillatory behavior.\n\n")
+    print("\nReduced Jansen–Rit model: dynamical analysis demo.\n")
+
+    print("Parent JR model oscillatory behavior:\n")
 
     plot_jr()
 
-    print("The dynamical regimes of the reduced model are much easier to analyze, and parameter adjustments can easily push the system into alternate dynamical regimes as new attractors emerge in phase plane space. \n\nThe following plots represent system behavior of three different regimes, produced by altering inhibitory lag (tau_I), excitatory drive (P_E), and system gain (g). The phase plane analysis plot will follow the plot of the regime's temporal excitatory and inhibitory activity levels.")
+    print("Reduced model regimes (time series + phase plane):\n")
 
     plot_reduced_dynamics(params_stable)
     phase_plane_analysis(params_stable)
 
     plot_reduced_dynamics(params_damped_reduced)
     phase_plane_analysis(params_damped_reduced)
-    
+
     plot_reduced_dynamics(params_limit_cycle)
     phase_plane_analysis(params_limit_cycle)
 
-    print("\n\nAn EEG-like proxy signal can be deduced by representing the push/pull nature of the overall activity levels at any moment in the regime. The current plot illustrates this across regimes.")
+    print(
+        "Sensitivity to initial conditions and simulation duration(same parameters):\n"
+    )
+
+    phase_plane_analysis(params_limit_cycle, E0=0.2, I0=1.1, T=2000)
+    phase_plane_analysis(params_limit_cycle, E0=0.2, I0=0.8, T=2000)
+    phase_plane_analysis(params_limit_cycle, E0=0.2, I0=0.7, T=1000)
+    phase_plane_analysis(params_limit_cycle, E0=0.2, I0=0.7, T=3000)
+
+    print("EEG proxy signal across regimes:\n")
 
     plot_proxy(params_all_dynamical)
 
-    print("\n\nSweeping parameters and simulating the activity of the EEG proxy signals allows a clear view of the impact that each parameter has on the oscillatory behavior of the system. See the current figure illustrating these basic sweeps.")
+    print("Parameter sweeps (gain, drive, delay):\n")
 
     plot_proxy_sweeps(params_all_sweep)
-    
-    print("\n\nWe can perform an acompanying spectral analysis to strengthen the distinction between regimes - the following plots show that the oscillatory regime has drastically more concentrated spectral content than do those of the stable or damped-oscillatory regimes.")
 
-    plot_spectral(params_all_dynamical)
+    print("Spectral comparison across regimes:\n")
 
-    print("\n\nThis concludes the visualization of the analysis - see attached report for further detail.\n\n")
+    plot_spectral_welch(params_all_dynamical)
 
+    print("\nEnd of demo. See report for details.\n")
 
 
 BASE_PARAMS = {
@@ -46,8 +55,8 @@ BASE_PARAMS = {
 
 params_limit_cycle = {
     **BASE_PARAMS,
-    "tau_I": 40.0, #40
-    "P_E": 0.3, #0.3
+    "tau_I": 40.0,  # 40
+    "P_E": 0.3,  # 0.3
     "g": 3.0,
     "name": "Limit Cycle",
 }
@@ -98,11 +107,7 @@ params_all_dynamical = [
     params_limit_cycle,
 ]
 
-params_all_sweep = [
-    params_g_sweep,
-    params_P_sweep,
-    params_tau_sweep
-]
+params_all_sweep = [params_g_sweep, params_P_sweep, params_tau_sweep]
 
 if __name__ == "__main__":
     main()
